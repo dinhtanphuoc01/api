@@ -52,7 +52,7 @@ class APIProductController extends Controller
 
         $products->save();
 
-        return response()->json(['api' => view('api')->render(), 'products' => $products], 200);
+        return response()->json(['api' => view('api')->render(), 'products' => $products], 201);
     }
 
     /**

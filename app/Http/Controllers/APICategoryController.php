@@ -49,7 +49,7 @@ class APICategoryController extends Controller
 
         $categories->save();
 
-        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 200);
+        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 201);
     }
 
     /**
