@@ -18,7 +18,7 @@ class APICategoryController extends Controller
 
         if ($id == null) {
             $categories = Category::all();
-            return response()->json(['api' => view('api')->render(), 'categories' => $categories], 200);
+            return response()->json(['categories' => $categories], 200);
         } else {
             return $this->show($id);
         }
@@ -49,7 +49,7 @@ class APICategoryController extends Controller
 
         $categories->save();
 
-        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 201);
+        return response()->json(['categories' => $categories], 201);
     }
 
     /**
@@ -61,7 +61,7 @@ class APICategoryController extends Controller
     public function show($id)
     {
         $categories = Category::find($id);
-        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 200);
+        return response()->json(['categories' => $categories], 200);
     }
     /**
      * Show the form for editing the specified resource.
@@ -90,7 +90,7 @@ class APICategoryController extends Controller
 
         $categories->save();
 
-        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 200);
+        return response()->json(['categories' => $categories], 200);
     }
 
     /**
@@ -105,7 +105,7 @@ class APICategoryController extends Controller
 
         $categories->delete();
 
-        return response()->json(['api' => view('api')->render(), 'categories' => $categories], 200);  
+        return response()->json(['categories' => $categories], 200);
         
     }
 }

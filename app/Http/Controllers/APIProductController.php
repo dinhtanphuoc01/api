@@ -17,7 +17,7 @@ class APIProductController extends Controller
     {
         if ($id == null) {
             $products = Product::all();
-            return response()->json(['api' => view('api')->render(), 'products' => $products], 200);
+            return response()->json(['products' => $products], 200);
         } else {
             return $this->show($id);
         }
@@ -52,7 +52,7 @@ class APIProductController extends Controller
 
         $products->save();
 
-        return response()->json(['api' => view('api')->render(), 'products' => $products], 201);
+        return response()->json(['products' => $products], 201);
     }
 
     /**
@@ -64,7 +64,7 @@ class APIProductController extends Controller
     public function show($id)
     {
         $products = Product::find($id);
-        return response()->json(['api' => view('api')->render(), 'products' => $products], 200);
+        return response()->json(['products' => $products], 200);
     }
 
     /**
@@ -97,7 +97,7 @@ class APIProductController extends Controller
 
         $products->save();
 
-        return response()->json(['api' => view('api')->render(), 'products' => $products], 200);
+        return response()->json(['products' => $products], 200);
     }
 
     /**
@@ -112,7 +112,7 @@ class APIProductController extends Controller
 
         $products->save();
 
-        return response()->json(['api' => view('api')->render(), 'products' => $products], 200);
+        return response()->json(['products' => $products], 200);
 
     }
 }
