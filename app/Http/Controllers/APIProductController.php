@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Product;
-
+use Validator;
 class APIProductController extends Controller
 {
     /**
@@ -16,8 +16,28 @@ class APIProductController extends Controller
     public function index($id = null)
     {
         if ($id == null) {
-            $products = Product::all();
-            return response()->json(['products' => $products], 200);
+            $products = Product::paginate(3);
+            return response()->json([
+                [
+                    'meta'  => [
+                        'status'        => 200,
+                        'total'         => $products->total(),
+                        'total-pages'   => round($products->total() / $products->perPage()),
+                        'per-page'      => $products->perPage(),
+                        'count'         => $products->count(),
+                    ]
+                ],
+                [
+                    'products'  => $products,
+                    'links'     => [
+                        'seft'  =>  'http://localhost:8080/public/api/product?page=' .$products->currentPage(),
+                        'first' => $products->url(1),
+                        'prev'  => $products->previousPageUrl(),
+                        'next'  => $products->nextPageUrl(),
+                        'last'  => 'http://localhost:8080/public/api/product?page=' .$products->lastPage(),
+                    ]
+                ]
+            ]);
         } else {
             return $this->show($id);
         }
@@ -42,17 +62,31 @@ class APIProductController extends Controller
      */
     public function store(Request $request)
     {
-        $products = new Product;
+        $validator = Validator::make($request->all(), [
+            'name'  => 'required|max:255|unique:products',
+        ]);
 
-        $products->name = $request->input('name');
-        $products->detail = $request->input('detail');
-        $products->image = $request->input('image');
-        $products->price = $request->input('price');
-        $products->categories_id = $request->input('categories_id');
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator,
+                'input' => $request,
+            ]);
+        } else {
+            $products = new Product;
 
-        $products->save();
+            $products->name = $request->input('name');
+            $products->detail = $request->input('detail');
+            $products->image = $request->input('image');
+            $products->price = $request->input('price');
+            $products->categories_id = $request->input('categories_id');
 
-        return response()->json(['products' => $products], 201);
+            $products->save();
+
+            return response()->json([
+                'status'    => 201,
+                'message'   => 'Create Ok',
+            ]);
+        }
     }
 
     /**
@@ -63,8 +97,20 @@ class APIProductController extends Controller
      */
     public function show($id)
     {
-        $products = Product::find($id);
-        return response()->json(['products' => $products], 200);
+        $products = Product::findOrFail($id);
+        return response([
+            [
+                'meta'  => [
+                    'status'    => 200,
+                ]
+            ],
+            [
+                'product'   => $products,
+            ],
+            [
+                'seft'  => 'http://localhost:8080/public/api/product/' .$products['id'],
+            ]
+        ]);
     }
 
     /**
@@ -87,17 +133,31 @@ class APIProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $products = Product::find($id);
+        $validator = Validator::make($request->all(), [
+            'name'  => 'required|max:255|unique:products',
+        ]);
 
-        $products->name = $request->input('name');
-        $products->detail = $request->input('detail');
-        $products->image = $request->input('image');
-        $products->price = $request->input('price');
-        $products->categories_id = $request->input('categories_id');
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator,
+                'input' => $request,
+            ]);
+        } else {
+            $products = Product::findOrFail($id);
 
-        $products->save();
+            $products->name = $request->input('name');
+            $products->detail = $request->input('detail');
+            $products->image = $request->input('image');
+            $products->price = $request->input('price');
+            $products->categories_id = $request->input('categories_id');
 
-        return response()->json(['products' => $products], 200);
+            $products->save();
+
+            return response()->json([
+                'status'    => 200,
+                'message'   => 'Update Ok',
+            ]);
+        }
     }
 
     /**
@@ -112,7 +172,10 @@ class APIProductController extends Controller
 
         $products->save();
 
-        return response()->json(['products' => $products], 200);
+        return response()->json([
+            'status'    => 200,
+            'message'   => 'Delete Ok',
+        ]);
 
     }
 }

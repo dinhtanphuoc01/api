@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\hHttp\Response;
 use App\Category;
+use Validator;
 
 class APICategoryController extends Controller
 {
@@ -17,8 +18,30 @@ class APICategoryController extends Controller
     {
 
         if ($id == null) {
-            $categories = Category::all();
-            return response()->json(['categories' => $categories], 200);
+            $categories = Category::paginate(3);
+
+            return response()->json([
+                [
+                    'meta' => [
+                        'status'        => 200,
+                        'total'         => $categories->total(),
+                        'total-pages'   => round($categories->total() / $categories->perPage()),
+                        'per-page'      => $categories->perPage(),
+                        'count'         => $categories->count(), 
+                    ]
+                ],
+                [
+                    'categories'    => $categories,
+                    'links'         => [
+                        'self'  =>  'http://localhost:8080/public/api/category?page=' .$categories->currentPage(),
+                        'first' =>  $categories->url(1),
+                        'prev'  =>  $categories->previousPageUrl(),
+                        'next'  =>  $categories->nextPageUrl(),
+                        'last'  =>  'http://localhost:8080/public/api/category?page=' .$categories->lastPage(),
+                    ]
+                ]
+            ]);
+
         } else {
             return $this->show($id);
         }
@@ -42,14 +65,28 @@ class APICategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $categories = new Category;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:20|unique:categories',
+        ]);
 
-        $categories->name = $request->input('name');
-        $categories->parent_id = $request->input('parent_id');
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator,
+                'input' => $request,
+            ]);
+        } else {
+            $categories = new Category;
 
-        $categories->save();
+            $categories->name = $request->input('name');
+            $categories->parent_id = $request->input('parent_id');
 
-        return response()->json(['categories' => $categories], 201);
+            $categories->save();
+
+            return response()->json([
+                'status'    => 201,
+                'message'   => 'Create OK',
+            ]);
+        }
     }
 
     /**
@@ -60,8 +97,21 @@ class APICategoryController extends Controller
      */
     public function show($id)
     {
-        $categories = Category::find($id);
-        return response()->json(['categories' => $categories], 200);
+        $categories = Category::findOrFail($id);
+        return response()->json([
+            [
+                'meta'  => [
+                    'status'    => 200,
+                ]
+            ],
+            [
+                'category'  => $categories,
+            ],
+            [
+                'seft'  => 'http://localhost:8080/public/api/category/'.$categories['id'],
+            ]
+
+        ]);
     }
     /**
      * Show the form for editing the specified resource.
@@ -83,14 +133,28 @@ class APICategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $categories = Category::find($id);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:20|unique:categories',
+        ]);
 
-        $categories->name = $request->input('name');
-        $categories->parent_id = $request->input('parent_id');
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator,
+                'input' => $request,
+            ]);
+        } else {
+            $categories =   Category::findOrFail($id);
 
-        $categories->save();
+            $categories->name = $request->input('name');
+            $categories->parent_id = $request->input('parent_id');
 
-        return response()->json(['categories' => $categories], 200);
+            $categories->save();
+
+            return response()->json([
+                'status'    => 200,
+                'message'   => 'Update OK',
+            ]);
+        }
     }
 
     /**
@@ -101,11 +165,14 @@ class APICategoryController extends Controller
      */
     public function destroy($id)
     {   
-        $categories = Category::find($id);
+        $categories = Category::findOrFail($id);
 
         $categories->delete();
 
-        return response()->json(['categories' => $categories], 200);
+        return response()->json([
+            'status'    => 200,
+            'message'   => 'Delete Ok',
+        ]);
         
     }
 }
