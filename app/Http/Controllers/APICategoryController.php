@@ -66,7 +66,8 @@ class APICategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|max:20|unique:categories',
+            'name'      => 'required|max:20|unique:categories',
+            'parent_id' => 'integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -135,6 +136,7 @@ class APICategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:20|unique:categories',
+            'parent_id' => 'integer|min:0',
         ]);
 
         if ($validator->fails()) {

@@ -63,7 +63,11 @@ class APIProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'  => 'required|max:255|unique:products',
+            'name'          => 'required|max:30|unique:products',
+            'detail'        => 'required|max:255',
+            'image'         => 'required|max:255',
+            'price'         => 'integer|min:100000',
+            'categories_id' => 'integer|min:1',
         ]);
 
         if ($validator->fails()) {
@@ -134,7 +138,11 @@ class APIProductController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name'  => 'required|max:255|unique:products',
+            'name'          => 'required|max:30|unique:products',
+            'detail'        => 'required|max:255',
+            'image'         => 'required|max:255',
+            'price'         => 'integer|min:100000',
+            'categories_id' => 'integer|min:1',
         ]);
 
         if ($validator->fails()) {
