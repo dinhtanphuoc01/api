@@ -14,46 +14,38 @@ class APICategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id = null)
+    public function index()
     {
+        $categories       = Category::paginate(3);
+        $categories_array = $categories->toArray();
+        foreach ($categories_array['data'] as $key => $value) {
+            $created_at                                   = strtotime($value['created_at']);
+            $created_at                                   = date('Y-m-d\TH:i:s.u\Z', $created_at);
+            $categories_array['data'][$key]['created_at'] = $created_at;
 
-        if ($id == null) {
-            $categories       = Category::paginate(3);
-            $categories_array = $categories->toArray();
-            foreach ($categories_array['data'] as $key => $value) {
-                $created_at                                   = strtotime($value['created_at']);
-                $created_at                                   = date('Y-m-d\TH:i:s.u\Z', $created_at);
-                $categories_array['data'][$key]['created_at'] = $created_at;
-
-                $updated_at                                   = strtotime($value['updated_at']);
-                $updated_at                                   = date('Y-m-d\TH:i:s.u\Z', $updated_at);
-                $categories_array['data'][$key]['updated_at'] = $updated_at;
-            }
-            return response()->json([
-                [
-                    'meta' => [
-                        'status'      => 200,
-                        'total'       => $categories->total(),
-                        'total-pages' => round($categories->total() / $categories->perPage()),
-                        'per-page'    => $categories->perPage(),
-                        'count'       => $categories->count(),
-                    ],
-                ],
-                [
-                    'categories' => $categories_array['data'],
-                    'links'      => [
-                        'self'  => 'http://localhost:8080/public/api/category?page=' . $categories->currentPage(),
-                        'first' => $categories->url(1),
-                        'prev'  => $categories->previousPageUrl(),
-                        'next'  => $categories->nextPageUrl(),
-                        'last'  => 'http://localhost:8080/public/api/category?page=' . $categories->lastPage(),
-                    ],
-                ],
-            ]);
-
-        } else {
-            return $this->show($id);
+            $updated_at                                   = strtotime($value['updated_at']);
+            $updated_at                                   = date('Y-m-d\TH:i:s.u\Z', $updated_at);
+            $categories_array['data'][$key]['updated_at'] = $updated_at;
         }
+        return response()->json([
+            'meta'       => [
+                'status'      => 200,
+                'total'       => $categories->total(),
+                'total-pages' => round($categories->total() / $categories->perPage()),
+                'per-page'    => $categories->perPage(),
+                'count'       => $categories->count(),
+            ],
+
+            'categories' => $categories_array['data'],
+
+            'links'      => [
+                'self'  => 'http://localhost:8080/public/api/category?page=' . $categories->currentPage(),
+                'first' => $categories->url(1),
+                'prev'  => $categories->previousPageUrl(),
+                'next'  => $categories->nextPageUrl(),
+                'last'  => 'http://localhost:8080/public/api/category?page=' . $categories->lastPage(),
+            ],
+        ]);
     }
 
     /**
@@ -99,12 +91,12 @@ class APICategoryController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Display the specified resource.
+ *
+ * @param  int  $id
+ * @return \Illuminate\Http\Response
+ */
     public function show($id)
     {
         $categories       = Category::findOrFail($id);
@@ -117,44 +109,40 @@ class APICategoryController extends Controller
         $updated_at = date('Y-m-d\TH:i:s.u\Z', $updated_at);
 
         return response()->json([
-            [
-                'meta' => [
-                    'status' => 200,
-                ],
+            'meta'     => [
+                'status' => 200,
             ],
-            [
-                'category' => [
-                    'id'         => $categories_array['id'],
-                    'name'       => $categories_array['name'],
-                    'parent_id'  => $categories_array['parent_id'],
-                    'created_at' => $created_at,
-                    'updated_at' => $updated_at,
-                ],
+
+            'category' => [
+                'id'         => $categories_array['id'],
+                'name'       => $categories_array['name'],
+                'parent_id'  => $categories_array['parent_id'],
+                'created_at' => $created_at,
+                'updated_at' => $updated_at,
             ],
-            [
-                'seft' => 'http://localhost:8080/public/api/category/' . $categories['id'],
-            ],
+
+            'seft'     => 'http://localhost:8080/public/api/category/' . $categories['id'],
 
         ]);
     }
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Show the form for editing the specified resource.
+ *
+ * @param  int  $id
+ * @return \Illuminate\Http\Response
+ */
     public function edit($id)
     {
 
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Update the specified resource in storage.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @param  int  $id
+ * @return \Illuminate\Http\Response
+ */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -182,12 +170,12 @@ class APICategoryController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+/**
+ * Remove the specified resource from storage.
+ *
+ * @param  int  $id
+ * @return \Illuminate\Http\Response
+ */
     public function destroy($id)
     {
         $categories = Category::findOrFail($id);
@@ -198,6 +186,5 @@ class APICategoryController extends Controller
             'status'  => 200,
             'message' => 'Delete Ok',
         ]);
-
     }
 }

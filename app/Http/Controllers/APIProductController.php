@@ -14,45 +14,38 @@ class APIProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id = null)
+    public function index()
     {
-        if ($id == null) {
-            $products       = Product::paginate(3);
-            $products_array = $products->toArray();
-            foreach ($products_array['data'] as $key => $value) {
-                $created_at                                 = strtotime($value['created_at']);
-                $created_at                                 = date('Y-m-d\TH:i:s.u\Z', $created_at);
-                $products_array['data'][$key]['created_at'] = $created_at;
+        $products       = Product::paginate(3);
+        $products_array = $products->toArray();
+        foreach ($products_array['data'] as $key => $value) {
+            $created_at                                 = strtotime($value['created_at']);
+            $created_at                                 = date('Y-m-d\TH:i:s.u\Z', $created_at);
+            $products_array['data'][$key]['created_at'] = $created_at;
 
-                $updated_at                                 = strtotime($value['updated_at']);
-                $updated_at                                 = date('Y-m-d\TH:i:s.u\Z', $updated_at);
-                $products_array['data'][$key]['updated_at'] = $updated_at;
-            }
-            return response()->json([
-                [
-                    'meta' => [
-                        'status'      => 200,
-                        'total'       => $products->total(),
-                        'total-pages' => round($products->total() / $products->perPage()),
-                        'per-page'    => $products->perPage(),
-                        'count'       => $products->count(),
-                    ],
-                ],
-                [
-                    'products' => $products_array['data'],
-                    'links'    => [
-                        'seft'  => 'http://localhost:8080/public/api/product?page=' . $products->currentPage(),
-                        'first' => $products->url(1),
-                        'prev'  => $products->previousPageUrl(),
-                        'next'  => $products->nextPageUrl(),
-                        'last'  => 'http://localhost:8080/public/api/product?page=' . $products->lastPage(),
-                    ],
-                ],
-            ]);
-        } else {
-            return $this->show($id);
+            $updated_at                                 = strtotime($value['updated_at']);
+            $updated_at                                 = date('Y-m-d\TH:i:s.u\Z', $updated_at);
+            $products_array['data'][$key]['updated_at'] = $updated_at;
         }
+        return response()->json([
+            'meta'     => [
+                'status'      => 200,
+                'total'       => $products->total(),
+                'total-pages' => round($products->total() / $products->perPage()),
+                'per-page'    => $products->perPage(),
+                'count'       => $products->count(),
+            ],
 
+            'products' => $products_array['data'],
+
+            'links'    => [
+                'seft'  => 'http://localhost:8080/public/api/product?page=' . $products->currentPage(),
+                'first' => $products->url(1),
+                'prev'  => $products->previousPageUrl(),
+                'next'  => $products->nextPageUrl(),
+                'last'  => 'http://localhost:8080/public/api/product?page=' . $products->lastPage(),
+            ],
+        ]);
     }
 
     /**
@@ -122,25 +115,21 @@ class APIProductController extends Controller
         $updated_at = date('Y-m-d\TH:i:s.u\Z', $updated_at);
 
         return response([
-            [
-                'meta' => [
-                    'status' => 200,
-                ],
+            'meta'    => [
+                'status' => 200,
             ],
-            [
-                'product' => [
-                    'id'         => $products_array['id'],
-                    'name'       => $products_array['name'],
-                    'detail'     => $products_array['detail'],
-                    'image'      => $products_array['image'],
-                    'price'      => $products_array['price'],
-                    'created_at' => $created_at,
-                    'updated_at' => $updated_at,
-                ],
+
+            'product' => [
+                'id'         => $products_array['id'],
+                'name'       => $products_array['name'],
+                'detail'     => $products_array['detail'],
+                'image'      => $products_array['image'],
+                'price'      => $products_array['price'],
+                'created_at' => $created_at,
+                'updated_at' => $updated_at,
             ],
-            [
-                'seft' => 'http://localhost:8080/public/api/product/' . $products['id'],
-            ],
+
+            'seft'    => 'http://localhost:8080/public/api/product/' . $products['id'],
         ]);
     }
 
