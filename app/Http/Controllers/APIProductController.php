@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequests;
 use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class APIProductController extends Controller
 {
@@ -14,6 +14,12 @@ class APIProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('jwt.auth');
+    }
+
     public function index()
     {
         $products       = Product::paginate(3);
@@ -64,37 +70,23 @@ class APIProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequests $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'          => 'required|max:30|unique:products',
-            'detail'        => 'required|max:255',
-            'image'         => 'required|max:255',
-            'price'         => 'integer|min:100000',
-            'categories_id' => 'integer|min:1',
+        $products = new Product;
+
+        $products->name          = $request->input('name');
+        $products->detail        = $request->input('detail');
+        $products->image         = $request->input('image');
+        $products->price         = $request->input('price');
+        $products->categories_id = $request->input('categories_id');
+
+        $products->save();
+
+        return response()->json([
+            'status'  => 201,
+            'message' => 'Create Ok',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator,
-                'input' => $request,
-            ]);
-        } else {
-            $products = new Product;
-
-            $products->name          = $request->input('name');
-            $products->detail        = $request->input('detail');
-            $products->image         = $request->input('image');
-            $products->price         = $request->input('price');
-            $products->categories_id = $request->input('categories_id');
-
-            $products->save();
-
-            return response()->json([
-                'status'  => 201,
-                'message' => 'Create Ok',
-            ]);
-        }
     }
 
     /**
@@ -151,37 +143,24 @@ class APIProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductRequests $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name'          => 'required|max:30|unique:products',
-            'detail'        => 'required|max:255',
-            'image'         => 'required|max:255',
-            'price'         => 'integer|min:100000',
-            'categories_id' => 'integer|min:1',
+
+        $products = Product::findOrFail($id);
+
+        $products->name          = $request->input('name');
+        $products->detail        = $request->input('detail');
+        $products->image         = $request->input('image');
+        $products->price         = $request->input('price');
+        $products->categories_id = $request->input('categories_id');
+
+        $products->save();
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Update Ok',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator,
-                'input' => $request,
-            ]);
-        } else {
-            $products = Product::findOrFail($id);
-
-            $products->name          = $request->input('name');
-            $products->detail        = $request->input('detail');
-            $products->image         = $request->input('image');
-            $products->price         = $request->input('price');
-            $products->categories_id = $request->input('categories_id');
-
-            $products->save();
-
-            return response()->json([
-                'status'  => 200,
-                'message' => 'Update Ok',
-            ]);
-        }
     }
 
     /**

@@ -20,9 +20,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'cors'], function () {
     Route::resource('category', 'APICategoryController');
     Route::resource('product', 'APIProductController');
-});
-
-Route::group(['middleware' => 'cors'], function () {
     Route::post('search-category', 'APISearchController@searchCategory');
     Route::post('search-product', 'APISearchController@searchProduct');
 });

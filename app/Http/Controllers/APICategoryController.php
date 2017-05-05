@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Category;
-use Illuminate\hHttp\Response;
+use App\Http\Requests\CategoryRequests;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Http\Response;
 
 class APICategoryController extends Controller
 {
@@ -14,6 +14,12 @@ class APICategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('jwt.auth');
+    }
+
     public function index()
     {
         $categories       = Category::paginate(3);
@@ -45,7 +51,7 @@ class APICategoryController extends Controller
                 'next'  => $categories->nextPageUrl(),
                 'last'  => 'http://localhost:8080/public/api/category?page=' . $categories->lastPage(),
             ],
-        ]);
+        ], 200);
     }
 
     /**
@@ -64,31 +70,20 @@ class APICategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryRequests $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required|max:20|unique:categories',
-            'parent_id' => 'integer|min:0',
-        ]);
+        $categories = new Category;
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator,
-                'input' => $request,
-            ]);
-        } else {
-            $categories = new Category;
+        $categories->name      = $request->input('name');
+        $categories->parent_id = $request->input('parent_id');
 
-            $categories->name      = $request->input('name');
-            $categories->parent_id = $request->input('parent_id');
+        $categories->save();
 
-            $categories->save();
+        return response()->json([
+            'status'  => 201,
+            'message' => 'Created',
+        ], 201);
 
-            return response()->json([
-                'status'  => 201,
-                'message' => 'Create OK',
-            ]);
-        }
     }
 
 /**
@@ -123,7 +118,7 @@ class APICategoryController extends Controller
 
             'seft'     => 'http://localhost:8080/public/api/category/' . $categories['id'],
 
-        ]);
+        ], 200);
     }
 /**
  * Show the form for editing the specified resource.
@@ -143,31 +138,20 @@ class APICategoryController extends Controller
  * @param  int  $id
  * @return \Illuminate\Http\Response
  */
-    public function update(Request $request, $id)
+    public function update(CategoeyRequests $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required|max:20|unique:categories',
-            'parent_id' => 'integer|min:0',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator,
-                'input' => $request,
-            ]);
-        } else {
-            $categories = Category::findOrFail($id);
+        $category            = Category::findOrFail($id);
+        $category->name      = $request->input('name');
+        $category->parent_id = $request->input('parent_id');
 
-            $categories->name      = $request->input('name');
-            $categories->parent_id = $request->input('parent_id');
+        $category->save();
 
-            $categories->save();
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Updated',
+        ], 200);
 
-            return response()->json([
-                'status'  => 200,
-                'message' => 'Update OK',
-            ]);
-        }
     }
 
 /**
@@ -178,13 +162,13 @@ class APICategoryController extends Controller
  */
     public function destroy($id)
     {
-        $categories = Category::findOrFail($id);
+        $category = Category::findOrFail($id);
 
-        $categories->delete();
+        $category->delete();
 
         return response()->json([
             'status'  => 200,
-            'message' => 'Delete Ok',
-        ]);
+            'message' => 'Deleted',
+        ], 200);
     }
 }
