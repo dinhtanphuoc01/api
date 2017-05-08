@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Category;
+use JWTAuth;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
@@ -11,130 +13,256 @@ class CategoryTest extends TestCase
      *
      * @return void
      */
-    public function testIndex()
+    public function testLogin()
     {
-        $this->json('GET', '/api/category')
-            ->assertStatus(200)
-            ->assertJson([
-                'categories' => true,
-            ]);
+        $credentials = ['email' => 'dinhtanphuoc@gmail.com', 'password' => 'tanphuoc'];
+        $token       = JWTAuth::attempt($credentials);
+        return $token;
     }
 
-    public function testStore()
+    public function tokenExpired()
     {
-        $this->json('POST', '/api/category')
-            ->assertStatus(201);
+        return $tokenExpired = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDgwXC9wdWJsaWNcL2xvZ2luIiwiaWF0IjoxNDk0MjA2NTU5LCJleHAiOjE0OTQyMTAxNTksIm5iZiI6MTQ5NDIwNjU1OSwianRpIjoiMXJ1NnJkdk50TzhuTmt0WiJ9.oMhsVlbRii72HFghua2g40kbWX9Lghn-Ti27_YTswO8';
     }
 
-    public function testShow()
+    public function testGetIndexFound()
     {
-        $this->json('GET', 'api/category/1')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/2')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/3')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/4')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/5')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/6')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/7')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/8')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/9')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/10')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/11')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/12')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/13')
-            ->assertStatus(200)
-            ->assertJson([
-                'category' => true,
-            ]);
-        $this->json('GET', 'api/category/14')
-            ->assertStatus(404);
-        $this->json('GET', 'api/category/15')
-            ->assertStatus(404);
+        $res = $this->call('GET', "/api/category?token={$this->testLogin()}");
+        $this->assertEquals(200, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
     }
 
-    public function testUpdate()
+    public function testGetIndexTokenInvalid()
     {
-        //     $this->json('PUT', 'api/category/1')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/2')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/3')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/4')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/5')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/6')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/7')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/8')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/9')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/10')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/11')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/12')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/13')
-        //         ->assertStatus(200);
-        //     $this->json('PUT', 'api/category/14')
-        //         ->assertStatus(404);
-        //     $this->json('PUT', 'api/category/15')
-        //         ->assertStatus(404);
-        // }
+        $res = $this->call('GET', "/api/category?token=0{$this->testLogin()}");
 
-        public function testDestroy()
-        {
+        $this->assertEquals(400, $res->getStatusCode());
 
-        }
+        $results = json_decode($res->getContent());
     }
+
+    public function testGetIndexTokenExpired()
+    {
+        $res = $this->call('GET', "/api/category?token={$this->tokenExpired()}");
+
+        $this->assertEquals(401, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testGetIndexNotFound()
+    {
+        $res = $this->call('GET', '/api/categories');
+
+        $this->assertEquals(404, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPostCreateSuccess()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('POST', "/api/category?token={$this->testLogin()}", [
+            'name'      => $category->name,
+            'parent_id' => $category->parent_id,
+        ]);
+
+        $this->assertEquals(201, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPostCreateTokenExpired()
+    {
+        $res = $this->call('POST', "/api/category?token={$this->tokenExpired()}", []);
+
+        $this->assertEquals(401, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPostCreateValidationFailure()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('POST', "/api/category?token={$this->testLogin()}", []);
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+
+        $res = $this->call('POST', "/api/category?token=0{$this->testLogin()}", [
+            'name'      => $category->name,
+            'parent_id' => $category->parent_id,
+        ]);
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPostCreateNotFound()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('POST', "/api/categories?token={$this->testLogin()}", [
+            'name'      => $category->name,
+            'parent_id' => $category->parent_id,
+        ]);
+
+        $this->assertEquals(404, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testGetShowFound()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('GET', "/api/category/$category->id?token={$this->testLogin()}");
+
+        $this->assertEquals(200, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testGetShowNotFound()
+    {
+        $res = $this->call('GET', "/api/category/null?token={$this->testLogin()}");
+
+        $this->assertEquals(404, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testGetShowTokenExpired()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('GET', "/api/category/$category->id?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDgwXC9wdWJsaWNcL2xvZ2luIiwiaWF0IjoxNDk0MjExMTYyLCJleHAiOjE0OTQyMTQ3NjIsIm5iZiI6MTQ5NDIxMTE2MiwianRpIjoicHNKNm9PdU0xRUxMdUFqbiJ9.PdYddyqfEhntcl_jMrirQOfYsnv7-6aE4s0CpPiXk64");
+
+        $this->assertEquals(401, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testGetShowTokenInvalid()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('GET', "/api/category/$category->id?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDgwXC9wdWJsaWNcL2xvZ2luIiwiaWF0IjoxNDk0MjE3NjcxLCJleHAiOjE0OTQyMjEyNzEsIm5iZiI6MTQ5NDIxNzY3MSwianRpIjoiUVlxUEk0WVRmMDJFRWp2VyJ9.kydAEXCuDpuN29L5MfMIYCvzWIMd-KS62Qk_VlJGNH");
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPutUpdateSuccess()
+    {
+        $category  = factory(Category::class)->create();
+        $category2 = factory(Category::class)->create();
+
+        $res = $this->call('PUT', "/api/category/$category->id?token={$this->testLogin()}", [
+            'name'      => $category2->name,
+            'parent_id' => $category2->parent_id,
+        ]);
+
+        $this->assertEquals(200, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPutUpdateValidationFailse()
+    {
+        $category  = factory(Category::class)->create();
+        $category2 = factory(Category::class)->create();
+
+        $res = $this->call('PUT', "/api/category/$category->id?token={$this->testLogin()}", []);
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+
+        $res = $this->call('PUT', "/api/category/$category->id?token=0{$this->tokenExpired()}", [
+            'name'      => $category2->name,
+            'parent_id' => $category2->parent_id,
+        ]);
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPutUpdateTokenExpired()
+    {
+        $category  = factory(Category::class)->create();
+        $category2 = factory(Category::class)->create();
+
+        $res = $this->call('PUT', "/api/category/$category->id?token={$this->tokenExpired()}", [
+            'name'      => $category2->name,
+            'parent_id' => $category2->parent_id,
+        ]);
+
+        $this->assertEquals(401, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testPutUpdateNotFound()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('PUT', "/api/category/null?token={$this->testLogin()}", [
+            'name'      => $category->name,
+            'parent_id' => $category->parent_id,
+        ]);
+
+        $this->assertEquals(404, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testDeleteDestroySuccess()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('DELETE', "/api/category/$category->id?token={$this->testLogin()}");
+
+        $this->assertEquals(200, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testDeleteDestroyTokenInvalid()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('DELETE', "/api/category/$category->id?token=0{$this->tokenExpired()}");
+
+        $this->assertEquals(400, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testDeteleDestroyTokenExpired()
+    {
+        $category = factory(Category::class)->create();
+
+        $res = $this->call('DELETE', "/api/category/$category->id?token={$this->tokenExpired()}");
+
+        $this->assertEquals(401, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+
+    public function testDeteleDestroyNotFound()
+    {
+        $res = $this->call('DELETE', "/api/category/null?token={$this->testLogin()}");
+
+        $this->assertEquals(404, $res->getStatusCode());
+
+        $results = json_decode($res->getContent());
+    }
+}

@@ -14,7 +14,7 @@ class CategoryRequests extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class CategoryRequests extends FormRequest
     public function rules()
     {
         return [
-            'name'      => 'required|unique:categories|max:20',
+            'name'      => 'required|max:20',
             'parent_id' => 'required|integer|min:0',
         ];
     }
@@ -35,7 +35,6 @@ class CategoryRequests extends FormRequest
 
         return [
             'name.required'      => 'Bắt buộc có trường Name',
-            'name.unique'        => 'Name đã tồn tại',
             'name.max'           => 'Tối đa 20 kí tự',
             'parent_id.required' => 'Bắt buộc có trường Parent_id',
             'parent_id.integer'  => 'Bắt buộc trường parent_id là số',

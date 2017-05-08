@@ -138,7 +138,7 @@ class APICategoryController extends Controller
  * @param  int  $id
  * @return \Illuminate\Http\Response
  */
-    public function update(CategoeyRequests $request, $id)
+    public function update(CategoryRequests $request, $id)
     {
 
         $category            = Category::findOrFail($id);
