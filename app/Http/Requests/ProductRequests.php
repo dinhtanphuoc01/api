@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Response;
 
 class ProductRequests extends FormRequest
 {
@@ -24,30 +25,26 @@ class ProductRequests extends FormRequest
     public function rules()
     {
         return [
-            'name'        => 'required|unique:products|max:30',
-            'detail'      => 'required|max:255',
-            'image'       => 'required|max:255',
-            'price'       => 'required|integer|min:0',
-            'category_id' => 'required|integer|min:1',
+            'name'          => 'required|max:30',
+            'image'         => 'required|max:255',
+            'price'         => 'required|integer|min:0',
+            'categories_id' => 'required|integer|min:1',
         ];
     }
 
     public function messages()
     {
         return [
-            'name.required'        => 'Bắt buộc có trường Name',
-            'name.unique'          => 'Name đã tồn tại',
-            'name.max'             => 'Tối đa 30 kí tự',
-            'detail.required'      => 'Bắt buộc có trường Detail',
-            'detail.max'           => 'Tối đa 255 kí tự',
-            'image.required'       => 'Bắt buộc có trường Image',
-            'image.max'            => 'Tối đa 255 kí tự',
-            'price.required'       => 'Bắt buộc có trường Price',
-            'price.integer'        => 'Bắt buộc trường Price là số',
-            'price.min'            => 'Tối thiểu Price là 0',
-            'category_id.required' => 'Bắt buộc có trường Category_id',
-            'category_id.integer'  => 'Bắt buộc trường Category_id là số',
-            'category_id.min'      => 'Tối thiểu Category_id là 0',
+            'name.required'          => 'Bắt buộc có trường Name',
+            'name.max'               => 'Tối đa 30 kí tự',
+            'image.required'         => 'Bắt buộc có trường Image',
+            'image.max'              => 'Tối đa 255 kí tự',
+            'price.required'         => 'Bắt buộc có trường Price',
+            'price.integer'          => 'Bắt buộc trường Price là số',
+            'price.min'              => 'Tối thiểu Price là 0',
+            'categories_id.required' => 'Bắt buộc có trường Category_id',
+            'categories_id.integer'  => 'Bắt buộc trường Category_id là số',
+            'categories_id.min'      => 'Tối thiểu Category_id là 0',
         ];
     }
 

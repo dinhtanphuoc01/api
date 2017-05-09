@@ -51,7 +51,7 @@ class APIProductController extends Controller
                 'next'  => $products->nextPageUrl(),
                 'last'  => 'http://localhost:8080/public/api/product?page=' . $products->lastPage(),
             ],
-        ]);
+        ], 200);
     }
 
     /**
@@ -85,7 +85,7 @@ class APIProductController extends Controller
         return response()->json([
             'status'  => 201,
             'message' => 'Create Ok',
-        ]);
+        ], 201);
 
     }
 
@@ -122,7 +122,7 @@ class APIProductController extends Controller
             ],
 
             'seft'    => 'http://localhost:8080/public/api/product/' . $products['id'],
-        ]);
+        ], 200);
     }
 
     /**
@@ -159,7 +159,7 @@ class APIProductController extends Controller
         return response()->json([
             'status'  => 200,
             'message' => 'Update Ok',
-        ]);
+        ], 200);
 
     }
 
@@ -171,14 +171,14 @@ class APIProductController extends Controller
      */
     public function destroy($id)
     {
-        $products = Product::find($id);
+        $products = Product::findOrFail($id);
 
-        $products->save();
+        $products->delete();
 
         return response()->json([
             'status'  => 200,
             'message' => 'Delete Ok',
-        ]);
+        ], 200);
 
     }
 }

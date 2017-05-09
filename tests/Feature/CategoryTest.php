@@ -141,7 +141,7 @@ class CategoryTest extends TestCase
     {
         $category = factory(Category::class)->create();
 
-        $res = $this->call('GET', "/api/category/$category->id?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDgwXC9wdWJsaWNcL2xvZ2luIiwiaWF0IjoxNDk0MjExMTYyLCJleHAiOjE0OTQyMTQ3NjIsIm5iZiI6MTQ5NDIxMTE2MiwianRpIjoicHNKNm9PdU0xRUxMdUFqbiJ9.PdYddyqfEhntcl_jMrirQOfYsnv7-6aE4s0CpPiXk64");
+        $res = $this->call('GET', "/api/category/$category->id?token={$this->tokenExpired()}");
 
         $this->assertEquals(401, $res->getStatusCode());
 
@@ -152,7 +152,7 @@ class CategoryTest extends TestCase
     {
         $category = factory(Category::class)->create();
 
-        $res = $this->call('GET', "/api/category/$category->id?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImlzcyI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDgwXC9wdWJsaWNcL2xvZ2luIiwiaWF0IjoxNDk0MjE3NjcxLCJleHAiOjE0OTQyMjEyNzEsIm5iZiI6MTQ5NDIxNzY3MSwianRpIjoiUVlxUEk0WVRmMDJFRWp2VyJ9.kydAEXCuDpuN29L5MfMIYCvzWIMd-KS62Qk_VlJGNH");
+        $res = $this->call('GET', "/api/category/$category->id?token=0{$this->tokenExpired()}");
 
         $this->assertEquals(400, $res->getStatusCode());
 
@@ -220,7 +220,6 @@ class CategoryTest extends TestCase
         ]);
 
         $this->assertEquals(404, $res->getStatusCode());
-
         $results = json_decode($res->getContent());
     }
 

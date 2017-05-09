@@ -29,3 +29,13 @@ $factory->define(App\Category::class, function (Faker\Generator $faker) {
         'parent_id' => rand(0, 3),
     ];
 });
+
+$factory->define(App\Product::class, function (Faker\Generator $faker) {
+    return [
+        'name'          => $faker->unique()->name,
+        'detail'        => 'Hello',
+        'image'         => $faker->image,
+        'price'         => rand(0, 1000000),
+        'categories_id' => rand(1, 5),
+    ];
+});
